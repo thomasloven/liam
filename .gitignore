@@ -6,3 +6,8 @@
 .travis.yml
 lib/readme.txt
 platformio.ini
+/*/.vs/
+*/__vm/*
+*/Debug/
+*vcxproj*
+*.sln
