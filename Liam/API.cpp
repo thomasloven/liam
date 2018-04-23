@@ -124,20 +124,19 @@ bool API::setCommand()
 }
 bool API::CheckCommand()
 {
-
   #ifdef SERIALCOMMANDDEBUG
   printIndex();
   #endif
   short counter=0;
   for (int i = index; i < bufferlenght; i++)
   {
-    this->c = &buffer[i];
+    this->tempChar = &buffer[i];
     #ifdef SERIALCOMMANDDEBUG
     Serial.print("CheckCommand, value that will be checked ");
-    Serial.println(*c);
+    Serial.println(*tempChar);
     #endif
 
-    if (isalpha(*c))
+    if (isalpha(*tempChar))
     {
       #ifdef SERIALCOMMANDDEBUG
       Serial.print("LETTER FOUND IN COMMAND");
@@ -145,7 +144,7 @@ bool API::CheckCommand()
       return false;
       // char is a letter.. not acceptable as command;
     }
-    else if (isdigit(*c))
+    else if (isdigit(*tempChar))
     {
       temp[counter]=buffer[i]; // add bufforposition to out temp.. might come more digits;
       counter++;
@@ -153,9 +152,9 @@ bool API::CheckCommand()
     }
     else
     {
-      if(*c == endcommand || *c== delimit) /* Command must have either endcommand <#> or delimit <:> as end. */
+      if(*tempChar == endcommand || *tempChar== delimit) /* Command must have either endcommand <#> or delimit <:> as end. */
       {
-        if(*c == endcommand)
+        if(*tempChar == endcommand)
         {
           endCommandFound = true; // no args...
         }
@@ -168,7 +167,7 @@ bool API::CheckCommand()
       else
       {
         Serial.print("Hit borde man inte komma..");
-        Serial.print(*c);
+        Serial.print(*tempChar);
         Serial.println("Kolla tecken ovan");
         // response Invalid command.
         return false;
@@ -197,20 +196,20 @@ bool API::CheckArgs()
   short counter=0;
   for (int i = index + 1; i < bufferlenght; i++)
   {
-    this->c = &buffer[i];
+    this->tempChar = &buffer[i];
     #ifdef SERIALCOMMANDDEBUG
     Serial.print("args, value to check ");
-    Serial.print(*c);
+    Serial.print(*tempChar);
     Serial.print("\n");
     #endif
-    if (isalpha(*c))
+    if (isalpha(*tempChar))
     {
       #ifdef SERIALCOMMANDDEBUG
       Serial.print("char is a letter");
       #endif
       return false;
     } // if alpha
-    else if (isdigit(*c))
+    else if (isdigit(*tempChar))
     {
       temp[counter]=buffer[i]; // add bufforposition to out temp.. might come more digits;
       counter++;
@@ -220,7 +219,7 @@ bool API::CheckArgs()
       Serial.print('\n');
       #endif
     } // if digit
-    else if (*c == this->delimit)
+    else if (*tempChar == this->delimit)
     {
       argument[argscounter] = atoi(temp);
       #ifdef SERIALCOMMANDDEBUG
@@ -235,7 +234,7 @@ bool API::CheckArgs()
       clearTemp();
       counter=0;
     }
-    else if (*c == this->endcommand)
+    else if (*tempChar == this->endcommand)
     {/* all commmands must end with endcommand */
       argument[argscounter] = atoi(temp);
 
@@ -249,7 +248,7 @@ bool API::CheckArgs()
     {
       // Debbuing purpose
       Serial.print("This value will fail");
-      Serial.println(*c);
+      Serial.println(*tempChar);
       return false;
     }
   } // For loop

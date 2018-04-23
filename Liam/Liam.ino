@@ -77,7 +77,7 @@
 #include "API.h"
 
 // Global variables
-int state = DEFINITION::CUTTERSTATES::IDLE;
+int state = DEFINITION::CUTTERSTATES::MOWING;
 long time_at_turning = millis();
 int turn_direction = 1;
 //int LCDi = 0;
@@ -87,7 +87,7 @@ long LeftwheelOverload=0;
 long RightwheelOverload=0;
 
 long WeHaveDocked=0; /* denna används för att kolla om vi dockat i laddstation.
-vid varje loop under dockning så räknas denna upp med 1 om dockning, avlusning var 300 ms */
+vid varje loop under dockning så räknas denna upp med 1 om dockning, avläsning var 300 ms */
 long timeToUpdate=millis();
 long looptime = millis();
 
@@ -149,6 +149,10 @@ ERROR Error(&Display, LED_PIN, &Mower, &api, Defaults.GetUseAPI());
 
 int SetState(int In_state)
 {
+  if(In_state == DEFINITION::CUTTERSTATES::ERROR)
+  {
+    /* fixa så att vi ligger och vänta på att error sätts som ack*/
+  }
   time_at_turning = millis();
   switch (In_state) {
     case DEFINITION::CUTTERSTATES::MOWING:
@@ -208,18 +212,9 @@ int SetState(int In_state)
     return DEFINITION::CUTTERSTATES::ERROR;
   } // switch
 }// Set state
-/*
-  SerialEvent occurs whenever a new data comes in the hardware serial RX. This
-  routine is run between each time loop() runs, so using delay inside loop can
-  delay response. Multiple bytes of data may be available.
-*/
+
 void APIEvent() {
   // /// as for now only one command is stored and handled, might be a bigger buffer that could hold Multiple commands later on, but not for now.
-  // if(api.inputComplete)
-  // {
-  //   Serial.println("Har redan ett kommando");
-  //   return;
-  // }
     while (Serial.available()) {
     // get the new byte:
     char c = Serial.read();
@@ -310,7 +305,7 @@ void loop() {
 
   if(api.get_StateHasBeenChanged())
     {
-      state=SetState(state); // API kan ändra denna utan att det märks i detta scope.
+      state=SetState(state); // Incoming commands via api could have changes the current state.
       api.ResetStateHasBeenChanged();
     }
 

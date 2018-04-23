@@ -168,13 +168,13 @@ private:
 
   void Response_get_WheelOverloadlevel();
   void ACT_set_WheelOverloadlevel();
-  int SearchForChar(char *c);
+  int SearchForChar(char *char);
   short bufPos =0;
   API_COMMAND commandIndex=API::API_COMMAND::SetMotor;
 
 
   int index;
-  char *c;
+  char *tempChar;
   int *mainState;
   bool stateChanged=false;
   bool apidebug=true;

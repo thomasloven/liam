@@ -20,12 +20,10 @@ Placed under the GNU license
 class CLOCK {
     public:
     	void initialize();
-    
+
         void setGoOutTime(uint8_t Hour, uint8_t Minutes);
         void setGoHomeTime(uint8_t Hour, uint8_t Minutes);
-        
         bool timeToCut();
-        
         void printTime();
 
     private:
