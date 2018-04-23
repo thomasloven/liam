@@ -28,6 +28,7 @@ bool API::IsWrittenToEEPROM()
   bool written = eeprom_read_byte(0);
   return written;
 }
+// Borde nog vara en egen klass som skriver läser till/från eeprom.
 void API::EEPROM_READ()
 {
   eeprom_read_block((void*)definitionDefaults, (void*)1, sizeof(*definitionDefaults));
