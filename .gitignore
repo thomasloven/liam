@@ -4,4 +4,7 @@
 .clang_complete
 .gcc-flags.json
 .travis.yml
+*.iml
 lib/readme.txt
+build 
+.vscode
