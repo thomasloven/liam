@@ -1,5 +1,5 @@
 /* This is the library for a BWFSensor
-// 
+//
 // Changelog:
 //     2014-12-14 - Initial version by Jonas
 
@@ -33,21 +33,22 @@ Placed under the GNU license
 class BWFSENSOR {
     public:
         BWFSENSOR(int selA, int selB);
-        
+
         void select(int sensornumber);
-        
+
         void attach(int intpin);
-    	void readSensor();
-    	
+    	  void readSensor();
+      
         bool isTimedOut();
         bool isInside();
         bool isOutside();
         bool hasNoSignal();
-        
+
+        int getSignal(int value);
         void printSignal();
         void clearSignal();
-        
 
+        int getArrLength();
     private:
     // BWF Code for inside and outside the fence
 		static int inside_code[];
@@ -65,9 +66,11 @@ class BWFSENSOR {
     	int sensor_number;
     	const static int pulse_unit_length = 100;
     	const static int half_unit_length = 50;
-    	const static int arr_length=10;
+    	const static int arr_length=3;
     	int arr[arr_length];
     	int arr_count;
+
+
 
 };
 

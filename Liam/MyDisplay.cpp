@@ -30,19 +30,21 @@ boolean MYDISPLAY::initialize() {
 	current_row = 0;
 	current_col = 0;
 
-	for (int i=0; i<3; i++)
-		blink();
+  // Removed this so that Liam can start with SerialCommand..
+	//for (int i=0; i<3; i++)
+		//blink();
 
 	setCursor(0, 0);
 	print("SW version:");
-	setCursor(0, 1);
-  	sprintf (buffer, "%d.%d.%d", MAJOR_VERSION, MINOR_VERSION_1, MINOR_VERSION_2);
+
+  	sprintf (buffer, "%d.%d.%d ", MAJOR_VERSION, MINOR_VERSION_1, MINOR_VERSION_2);
   	print(buffer);
-	setCursor(0, 2);
+
 	print(__DATE__);
-	setCursor(0, 3);
+
 	print(__TIME__);
-	delay(3000);
+  // Removed in order to get faster start, I donät know if something could be out of sync because of this..
+  //delay(3000);
 	clear();
 }
 
@@ -51,7 +53,7 @@ void MYDISPLAY::update() {
 	int sens = 0;
 
     // Rad 1: Sensors
-	#if __MS9150__ || __MS5883L__ || __ADXL345__ || __MMA7455__ 
+	#if __MS9150__ || __MS5883L__ || __ADXL345__ || __MMA7455__
 	    setCursor(0,0);
 	    print("Comp:");
 	    setCursor(7,0);
@@ -90,16 +92,16 @@ void MYDISPLAY::update() {
     setCursor(7,3);
 
     switch (*moverstate) {
-    case MOWING:
+    case DEFINITION::CUTTERSTATES::MOWING:
       print("MOWING");
       break;
-    case LAUNCHING:
+    case DEFINITION::CUTTERSTATES::LAUNCHING:
       print("LAUNCHING");
       break;
-    case DOCKING:
+    case DEFINITION::CUTTERSTATES::DOCKING:
       print("DOCKING");
       break;
-    case CHARGING:
+    case DEFINITION::CUTTERSTATES::CHARGING:
       print("CHARGING");
       break;
     }

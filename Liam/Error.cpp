@@ -13,16 +13,23 @@ Placed under the GNU license
 
 /** Specific constructor.
  */
-ERROR::ERROR(MYDISPLAY* display_, int led_pin_, CONTROLLER* Mower_) {
+ERROR::ERROR(MYDISPLAY* display_, int led_pin_, CONTROLLER* Mower_, API *api, bool UseApi) {
  mylcd = display_;
  led_pin = led_pin_;
  Mower = Mower_;
+ this->api = api;
 }
-
+int* ERROR::ERRORCODE()
+{
+  return &this->errorCode;
+}
 void ERROR::flag(int error_number_) {
+
+  this->errorCode=error_number_;
 
   Mower->stopCutter();
   Mower->stop();
+
   mylcd->clear();
 
   mylcd->setCursor(5,0);
@@ -95,17 +102,32 @@ void ERROR::flag(int error_number_) {
   }
 
   // blink LED forever
-  while (true)
-	blink_led(error_number_);
+  //while (true)
+//	blink_led(error_number_);
+}
+bool ErrorIsClearded()
+{
+  return false; // this would need to be able to be set from API or from mower itself.
+}
+void ERROR::waitForReset()
+{
+
+  while(!ErrorIsClearded())
+  {
+    blink_led(errorCode);
+  }
 }
 
-
 void ERROR::blink_led(int error_number_){
-	for (int i=0; i<error_number_;i++) {
-		digitalWrite(led_pin, HIGH);
-		delay(500);
-		digitalWrite(led_pin, LOW);
-		delay(500);
-	}
-	delay (2000);
+  // blinka errornumber med 0.5 sekunde mellandrum. när errnum är klar. lys klart under 2 sekunder, börja sedan om.
+
+  for (int i = 0; i < error_number_ ; i++)
+  {
+    digitalWrite(led_pin,HIGH);
+    delay(500);
+    digitalWrite(led_pin,LOW);
+    delay(500);
+  }
+  digitalWrite(led_pin,HIGH);
+  delay(2000);
 }

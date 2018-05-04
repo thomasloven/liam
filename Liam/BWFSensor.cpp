@@ -12,7 +12,7 @@ Placed under the GNU license
 #include "BWFSensor.h"
 
 int BWFSENSOR::outside_code[] = {OUTSIDE_BWF};
-int BWFSENSOR::inside_code[] = {INSIDE_BWF};	
+int BWFSENSOR::inside_code[] = {INSIDE_BWF};
 
 /** Specific constructor.
  */
@@ -21,14 +21,13 @@ BWFSENSOR::BWFSENSOR(int selA, int selB) {
 	selpin_B = selB;
 }
 
-
 // select this sensor to be active
 void BWFSENSOR::select(int sensornumber) {
    digitalWrite(selpin_A, (sensornumber & 1) > 0 ? HIGH : LOW);
    digitalWrite(selpin_B, (sensornumber & 2) > 0 ? HIGH : LOW);
    clearSignal();
-   delay(200);			// Wait a little to collect signal
-   }
+   delay(9 * arr_length);	 //Used to be 200		// Wait a little to collect signal
+	}
 
 
 void BWFSENSOR::clearSignal() {
@@ -60,17 +59,18 @@ bool BWFSENSOR::hasNoSignal() {
 // This routine is run at every timer interrupt and updates the sensor status
 void BWFSENSOR::readSensor() {
   volatile int pulse_unit = 0;
-  
+
   // Calculate the time since last pulse
   pulse_length = int(micros() - pulse_time);
-  pulse_time = micros(); 
+  pulse_time = micros();
   pulse_unit = (pulse_length+half_unit_length) / pulse_unit_length;
-
-
-  // Store the numbers for debug printout
+// Store the numbers for debug printout
   arr[arr_count++] = pulse_unit;
-  	if (arr_count>arr_length) arr_count=0;
-
+	if (arr_count>arr_length)
+	{
+		arr_count=0;
+	}
+	
   // Check if the latest pulse fits the code for inside
   if (abs(pulse_unit-inside_code[pulse_count_inside]) < 2) {
     pulse_count_inside++;
@@ -97,12 +97,19 @@ void BWFSENSOR::readSensor() {
     pulse_count_outside=0;
 
 }
-
+int BWFSENSOR::getSignal(int value)
+{ int i = arr[value];
+	return i;
+}
 void BWFSENSOR::printSignal() {
-	
+
 	for (int i=0; i<arr_length; i++) {
 		Serial.print(arr[i]);
 		Serial.print(" ");
 	}
 
+}
+int BWFSENSOR::getArrLength()
+{
+		return this->arr_length;
 }

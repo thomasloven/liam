@@ -78,4 +78,85 @@ void DEFINITION::setDefaultLevels(BATTERY* battery, WHEELMOTOR* left, WHEELMOTOR
 	left->setOverloadLevel(WHEELMOTOR_OVERLOAD);
 	right->setOverloadLevel(WHEELMOTOR_OVERLOAD);
 	cutter->setOverloadLevel(CUTTER_OVERLOAD);
+	battery->setBatterType(this->get_MY_BATTERY_TYPE());
+	battery->setFullyChargedLevel(this->batteryFullLevel);
+	battery->setDepletedLevel(this->batteryEmptyLevel);
+	battery->setGoHomeLevel(this->batteryGoHomeLevel);
+
+}
+
+void DEFINITION::set_SETUP_AND_DEBUG(bool & value)
+{
+	this->setupAndDebug=value;
+}
+bool DEFINITION::get_SETUP_AND_DEBUG()
+{
+	return this->setupAndDebug;
+}
+BATTERY::BATTERY_TYPE  DEFINITION::get_MY_BATTERY_TYPE()
+{
+return this->my_battery_type;
+
+}
+int DEFINITION::getBattyFullLevel()
+{return this->batteryFullLevel;}
+int DEFINITION::getBattyEmptyLevel()
+{return this->batteryEmptyLevel;}
+int DEFINITION::getBattyGoHomeLevel()
+{return batteryGoHomeLevel;}
+void DEFINITION::setBatteryType(BATTERY::BATTERY_TYPE type)
+{
+	this->my_battery_type=type;
+}
+void DEFINITION::setBatteryFullLevel(int & value)
+{
+	this->batteryFullLevel = value;
+}
+void DEFINITION::setBatteryEmptyLevel(int & value)
+{
+	this->batteryEmptyLevel = value;
+}
+void DEFINITION::setBatteryGoHomeLevel(int & value)
+{
+	this->batteryGoHomeLevel = value;
+}
+bool DEFINITION::GetUseAPI()
+{
+	return this->useapi;
+}
+short DEFINITION::GetSlowWheelWhenDocking()
+{
+	return this->turnpercentWhenDocking;
+}
+void DEFINITION::SetSlowWheelWhenDocking(short value)
+{
+	this->turnpercentWhenDocking = value;
+}
+int DEFINITION::get_FULL_SPEED()
+{return this->FULLSPEED;}
+void DEFINITION::set_FULL_SPEED(int value)
+{this->FULLSPEED = value;}
+int DEFINITION::get_SLOW_SPEED()
+{return this->SLOWSPEED;}
+void DEFINITION::set_SLOW_SPEED(int value)
+{this->SLOWSPEED = value;}
+int DEFINITION::get_CUTTER_SPEED()
+{return this->CUTTERSPEED;}
+void DEFINITION::set_CUTTER_SPEED(int value)
+{this->CUTTERSPEED = value;}
+int DEFINITION::get_HeartBeatTime()
+{
+	return this->heartBeatTime;
+}
+void DEFINITION::set_HeartBeatTime(int value)
+{
+	this->heartBeatTime = value;
+}
+int DEFINITION::get_WheelOverload()
+{
+	return this->WHEELMOTOR_OVERLOAD;
+}
+void DEFINITION::set_WheelOverload(int value)
+{
+	this->WHEELMOTOR_OVERLOAD = value;
 }
