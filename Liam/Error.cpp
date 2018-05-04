@@ -103,9 +103,9 @@ void ERROR::flag(int error_number_) {
 
   // blink LED forever
   //while (true)
-	blink_led(error_number_);
+//	blink_led(error_number_);
 }
-void ErrorIsClearded()
+bool ErrorIsClearded()
 {
   return false; // this would need to be able to be set from API or from mower itself.
 }
@@ -120,12 +120,13 @@ void ERROR::waitForReset()
 
 void ERROR::blink_led(int error_number_){
   // blinka errornumber med 0.5 sekunde mellandrum. när errnum är klar. lys klart under 2 sekunder, börja sedan om.
-  for (int i = 0, i<error_number_,i++)
+
+  for (int i = 0; i < error_number_ ; i++)
   {
     digitalWrite(led_pin,HIGH);
     delay(500);
     digitalWrite(led_pin,LOW);
-    delay(500)
+    delay(500);
   }
   digitalWrite(led_pin,HIGH);
   delay(2000);

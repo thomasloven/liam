@@ -58,7 +58,7 @@
 #include <I2Cdev.h>
 #include "RTClib.h"
 #include "HMC5883L.h"
-#include "MPU9150.h"
+#include <MPU9150.h>
 #include "Battery.h"
 #include "Wheelmotor.h"
 #include "CutterMotor.h"
@@ -74,7 +74,7 @@
 #include "SensAdxl345.h"
 #include "MMA_7455.h"
 #include "SetupDebug.h"
-#include "API.h"
+#include "./API/API.h"
 
 // Global variables
 int state = DEFINITION::CUTTERSTATES::MOWING;
@@ -145,8 +145,8 @@ SETUPDEBUG SetupDebug(&leftMotor, &rightMotor, &CutterMotor, &Sensor, &Compass, 
 //API
 API api(&leftMotor, &rightMotor, &CutterMotor, &Sensor, &Compass, &Battery, &Defaults, &state, &Mower); // add state to be able to set state from api.
 // Error handler
-ERROR Error(&Display, LED_PIN, &Mower, &api, Defaults.GetUseAPI());
 
+ERROR Error(&Display, LED_PIN, &Mower, &api, Defaults.GetUseAPI());
 int SetState(int In_state)
 {
   if(In_state == DEFINITION::CUTTERSTATES::ERROR)

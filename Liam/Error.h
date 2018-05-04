@@ -12,7 +12,7 @@ Placed under the GNU license
 #include <Wire.h>  // For LCD
 #include "myLcd.h"
 #include "Controller.h"
-#include "API.h"
+#include "./API/API.h"
 #ifndef _ERROR_H_
 #define _ERROR_H_
 

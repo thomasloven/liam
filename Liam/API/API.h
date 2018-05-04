@@ -48,6 +48,16 @@ enum API_COMMAND {
 
   SetFirstByteToFalse=998 /* <;998# > */
 };
+
+
+/* nytt api över mqtt deklareras här.
+Allt annat kan när detta är klart raderas.
+*/
+  void apiInit();
+
+/*Allt under här ska kunna plockas bort. */
+
+
 /*Vet inte om man skulle kunna använda denna enum för att ge rätt kommandon till den som lyssnar på seriesnöret */
   const char* API_COMMAND_PRINT_NAME(API_COMMAND command)
   {
@@ -80,6 +90,8 @@ enum API_COMMAND {
   }
 
   API(WHEELMOTOR* left, WHEELMOTOR* right, CUTTERMOTOR* cut, BWFSENSOR* bwf, MOTIONSENSOR* comp, BATTERY* batt, DEFINITION *definition, int *state, CONTROLLER *controller);
+
+
 
   void SetFirstByteFalse();
   void ValidateCommand(); // entrypoint
@@ -168,7 +180,7 @@ private:
 
   void Response_get_WheelOverloadlevel();
   void ACT_set_WheelOverloadlevel();
-  int SearchForChar(char *char);
+  int SearchForChar(char *c);
   short bufPos =0;
   API_COMMAND commandIndex=API::API_COMMAND::SetMotor;
 
