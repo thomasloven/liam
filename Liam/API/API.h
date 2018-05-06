@@ -86,14 +86,6 @@ enum API_COMMAND {
 
   API(WHEELMOTOR* left, WHEELMOTOR* right, CUTTERMOTOR* cut, BWFSENSOR* bwf, MOTIONSENSOR* comp, BATTERY* batt, DEFINITION *definition, int *state, CONTROLLER *controller);
 
-  /* nytt api över mqtt deklareras här.
-  Allt annat kan när detta är klart raderas.
-  */
-    void apiInit();
-
-  /*Allt under här ska kunna plockas bort. */
-
-
   void SetFirstByteFalse();
   void ValidateCommand(); // entrypoint
   bool addByteToBuffer(char c);

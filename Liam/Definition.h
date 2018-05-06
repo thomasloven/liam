@@ -215,7 +215,7 @@ class DEFINITION {
         ERROR // LEAVE THIS AS LAST ITEM.. ALWAYS!!!! Error is used from API as end indicator.
         };
 
-      const char* get_CutterStatesName(short number)
+       const char* get_CutterStatesName(short number)
         {
           switch (number) {
             case MOWING:
@@ -231,6 +231,7 @@ class DEFINITION {
             case PREDOCK:
             case PRE_DOCK_RIGHT_OUT:
             case PRE_DOCK_LEFT_OUT:
+            return "Pre Dock";
             case ERROR:// LEAVE THIS AS LAST ITEM.. ALWAYS!!!! Error is used from API as end indicator.
             return "";
           }

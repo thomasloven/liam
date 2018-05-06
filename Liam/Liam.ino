@@ -78,6 +78,82 @@
 #include "SetupDebug.h"
 #include "./API/API.h"
 
+
+/* MQTT SECTION */
+/**
+ * Simple example to demo the esp-link MQTT client
+ */
+
+#include "./API/ELClient.h"
+#include "./API/ELClientCmd.h"
+#include "./API/ELClientMqtt.h"
+
+char *subTopic = "/liam1/cmd";
+bool connected = false;
+// Initialize a connection to esp-link using the normal hardware serial port both for
+// SLIP and for debug messages.
+ELClient esp(&Serial, &Serial);
+
+// Initialize CMD client (for GetTime)
+ELClientCmd cmd(&esp);
+
+// Initialize the MQTT client
+ELClientMqtt mqtt(&esp);
+
+// Callback made from esp-link to notify of wifi status changes
+// Here we just print something out for grins
+
+void wifiCb(void* response) {
+  ELClientResponse *res = (ELClientResponse*)response;
+  if (res->argc() == 1) {
+    uint8_t status;
+    res->popArg(&status, 1);
+
+    if(status == STATION_GOT_IP) {
+      Serial.println("WIFI CONNECTED");
+    } else {
+      Serial.print("WIFI NOT READY: ");
+      Serial.println(status);
+    }
+  }
+}
+
+// Callback when MQTT is connected
+void mqttConnected(void* response) {
+  Serial.println("MQTT connected!");
+  mqtt.subscribe(subTopic);
+  //mqtt.subscribe("/esp-link/2", 1);
+  connected = true;
+}
+
+// Callback when MQTT is disconnected
+void mqttDisconnected(void* response) {
+  Serial.println("MQTT disconnected");
+  connected = false;
+}
+
+// Callback when an MQTT message arrives for one of our subscriptions
+void mqttData(void* response) {
+  ELClientResponse *res = (ELClientResponse *)response;
+
+  Serial.print("Received: topic=");
+  String topic = res->popString();
+  Serial.println(topic);
+
+  Serial.print("data=");
+  String data = res->popString();
+  Serial.println(data);
+}
+
+void mqttPublished(void* response) {
+  Serial.println("MQTT published");
+}
+
+
+
+/* MQTT SECTION END */
+
+
 // Global variables
 int state = DEFINITION::CUTTERSTATES::IDLE;
 long time_at_turning = millis();
@@ -150,16 +226,26 @@ API api(&leftMotor, &rightMotor, &CutterMotor, &Sensor, &Compass, &Battery, &Def
 // Error handler
 
 ERROR Error(&Display, LED_PIN, &Mower, &api, Defaults.GetUseAPI());
+
 int SetState(int In_state)
 {
+  if(connected)
+  {
+    // const char *buf;
+    // buf = strcat("Setting state: ",Defaults.get_CutterStatesName(In_state));
+    // mqtt.publish("/liam1/event/",buf);
+  //delete buf;
+  }
+
   if(In_state == DEFINITION::CUTTERSTATES::ERROR)
   {
+
     /* fixa så att vi ligger och vänta på att error sätts som ack*/
   }
   time_at_turning = millis();
   switch (In_state) {
     case DEFINITION::CUTTERSTATES::MOWING:
-    Serial.println("IN SET MOWING state");
+
     Mower.startCutter();
     Mower.runForward(Defaults.get_FULL_SPEED());
     return DEFINITION::CUTTERSTATES::MOWING;
@@ -208,6 +294,7 @@ int SetState(int In_state)
     return DEFINITION::CUTTERSTATES::PRE_DOCK_RIGHT_OUT;
 
     case DEFINITION::CUTTERSTATES::ERROR:
+
     Serial.println("IN SET ERROR state");
     api.errorNumber=Error.ERRORCODE();
     Mower.stopCutter();
@@ -237,18 +324,44 @@ void updateBWF() {
 // ****************** Setup **************************************
 void setup()
 {
-
   Serial.begin(115200); 						// Fast communication on the serial port
-//   if(api.IsWrittenToEEPROM())
-//   {
-//     api.EEPROM_READ();
-//     Serial.println("Values initiated from eeprom");
-// }
-// else
-// {
-//     Serial.println("Values initiated to default");
-// }
+
+  if(api.IsWrittenToEEPROM())
+  {
+    api.EEPROM_READ();
+  }
     /*API har en pekare mot Defaults, så Defaults kommer få nya värden om raden ovan körs. */
+
+    /* MQTT SETUP */
+    //Serial.println("Client starting!");
+
+      // Sync-up with esp-link, this is required at the start of any sketch and initializes the
+      // callbacks to the wifi status change callback. The callback gets called with the initial
+      // status right after Sync() below completes.
+      Serial.clearWriteError();
+      Serial.flush();
+      esp.wifiCb.attach(wifiCb); // wifi status change callback, optional (delete if not desired)
+      bool ok;
+      do {
+        ok = esp.Sync();      // sync up with esp-link, blocks for up to 2 seconds
+        if (!ok)
+        Serial.println("sync failed ");
+      } while(!ok);
+      delay(80);
+      Serial.println("I'm synced ");
+
+      // Set-up callbacks for events and initialize with es-link.
+      mqtt.connectedCb.attach(mqttConnected);
+      mqtt.disconnectedCb.attach(mqttDisconnected);
+      mqtt.publishedCb.attach(mqttPublished);
+      mqtt.dataCb.attach(mqttData);
+      mqtt.setup();
+
+      //Serial.println("ARDUINO: setup mqtt lwt");
+      //mqtt.lwt("/lwt", "offline", 0, 0); //or mqtt.lwt("/lwt", "offline");
+
+      Serial.println("MQTT ready");
+      /* MQTT SETUP */
 
   Defaults.definePinsInputOutput();			// Configure all the pins for input or output
   Defaults.setDefaultLevels(&Battery, &leftMotor, &rightMotor, &CutterMotor); // Set default levels (defined in Definition.h) for your mower
@@ -276,20 +389,24 @@ void setup()
 //   SetupDebug.initialize(&Serial);
   if (Battery.isBeingCharged())	{			// If Liam is in docking station then
     state = SetState(DEFINITION::CUTTERSTATES::CHARGING);						// continue charging
-
   }
   else {										// otherwise
     state = SetState(DEFINITION::CUTTERSTATES::MOWING);
-
   }
   state = SetState(DEFINITION::CUTTERSTATES::IDLE);
-Serial.print(";");
-Serial.print(API::API_COMMAND::ONLINE);
-Serial.println('#');
+  // Serial.print(";");
+  // Serial.print(API::API_COMMAND::ONLINE);
+  // Serial.println('#');
 }
 void updateListeners()
 {
-  api.sendHeartBeat();
+  if(connected)
+  {
+
+    mqtt.publish("/liam1/event/",Defaults.get_CutterStatesName(state));
+
+  }
+  //api.sendHeartBeat();
   if(Defaults.GetUseAPI())
   {
 
@@ -301,12 +418,13 @@ void updateListeners()
 }
 // ***************** Main loop ***********************************
 void loop() {
+   esp.Process();
     looptime = millis();
 
-  if(api.inputComplete)
-    api.ValidateCommand();
-  else
-    APIEvent();
+  // if(api.inputComplete)
+  //   api.ValidateCommand();
+  // else
+  //   APIEvent();
 
   if(api.get_StateHasBeenChanged())
     {
