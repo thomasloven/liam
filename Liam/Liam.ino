@@ -239,13 +239,15 @@ void setup()
 {
 
   Serial.begin(115200); 						// Fast communication on the serial port
-  //if(api.IsWrittenToEEPROM())
-  //{
-  //  api.EEPROM_READ();
-    //Serial.println("Values initiated from eeprom");
-//}
-//else
-  //Serial.println("Values initiated to default");
+//   if(api.IsWrittenToEEPROM())
+//   {
+//     api.EEPROM_READ();
+//     Serial.println("Values initiated from eeprom");
+// }
+// else
+// {
+//     Serial.println("Values initiated to default");
+// }
     /*API har en pekare mot Defaults, så Defaults kommer få nya värden om raden ovan körs. */
 
   Defaults.definePinsInputOutput();			// Configure all the pins for input or output
@@ -299,8 +301,6 @@ void updateListeners()
 }
 // ***************** Main loop ***********************************
 void loop() {
-Serial.println("loooop");
-delay(3000);
     looptime = millis();
 
   if(api.inputComplete)

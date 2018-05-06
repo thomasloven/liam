@@ -51,12 +51,6 @@ enum API_COMMAND {
 };
 
 
-/* nytt api över mqtt deklareras här.
-Allt annat kan när detta är klart raderas.
-*/
-  void apiInit();
-
-/*Allt under här ska kunna plockas bort. */
 
 
 /*Vet inte om man skulle kunna använda denna enum för att ge rätt kommandon till den som lyssnar på seriesnöret */
@@ -92,6 +86,12 @@ Allt annat kan när detta är klart raderas.
 
   API(WHEELMOTOR* left, WHEELMOTOR* right, CUTTERMOTOR* cut, BWFSENSOR* bwf, MOTIONSENSOR* comp, BATTERY* batt, DEFINITION *definition, int *state, CONTROLLER *controller);
 
+  /* nytt api över mqtt deklareras här.
+  Allt annat kan när detta är klart raderas.
+  */
+    void apiInit();
+
+  /*Allt under här ska kunna plockas bort. */
 
 
   void SetFirstByteFalse();
