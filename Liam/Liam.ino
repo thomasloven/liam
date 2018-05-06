@@ -22,7 +22,9 @@
 	Free to use for all.
 
         Changelog:
-
+        5.3 - API over MQTT
+          - 2018-05-05 Ola Palm
+                  INIT
         5.2-SNAPSHOT
           - 2017-06-16 Roberth Andersson:
                  - Added SetupDebug class
@@ -77,9 +79,10 @@
 #include "./API/API.h"
 
 // Global variables
-int state = DEFINITION::CUTTERSTATES::MOWING;
+int state = DEFINITION::CUTTERSTATES::IDLE;
 long time_at_turning = millis();
 int turn_direction = 1;
+
 //int LCDi = 0;
 bool sensorwasout=false;
 int Current_spikeTime=300;
@@ -236,13 +239,13 @@ void setup()
 {
 
   Serial.begin(115200); 						// Fast communication on the serial port
-  if(api.IsWrittenToEEPROM())
-  {
-    api.EEPROM_READ();
-    Serial.println("Läste från eeprom");
-}
-else
-  Serial.println("Läste inte från eeprom");
+  //if(api.IsWrittenToEEPROM())
+  //{
+  //  api.EEPROM_READ();
+    //Serial.println("Values initiated from eeprom");
+//}
+//else
+  //Serial.println("Values initiated to default");
     /*API har en pekare mot Defaults, så Defaults kommer få nya värden om raden ovan körs. */
 
   Defaults.definePinsInputOutput();			// Configure all the pins for input or output
@@ -296,6 +299,8 @@ void updateListeners()
 }
 // ***************** Main loop ***********************************
 void loop() {
+Serial.println("loooop");
+delay(3000);
     looptime = millis();
 
   if(api.inputComplete)

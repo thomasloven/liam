@@ -63,8 +63,6 @@ void mqttConnected(void* response) {
   Serial.println("MQTT connected!");
   mqtt.subscribe("/esp-link/1/");
   mqtt.subscribe("/hello/world/#");
-  //mqtt.subscribe("/esp-link/2", 1);
-  //mqtt.publish("/esp-link/0", "test1");
   connected = true;
 }
 
@@ -116,7 +114,7 @@ void apiLoop() {
 }
 
 void API::apiInit() {
-  Serial.println("EL-Client starting!");
+  Serial.println("API starting!");
 
   // Sync-up with esp-link, this is required at the start of any sketch and initializes the
   // callbacks to the wifi status change callback. The callback gets called with the initial
@@ -125,9 +123,9 @@ void API::apiInit() {
   bool ok;
   do {
     ok = esp.Sync();      // sync up with esp-link, blocks for up to 2 seconds
-    if (!ok) Serial.println("EL-Client sync failed!");
+    if (!ok) Serial.println("API sync failed!");
   } while(!ok);
-  Serial.println("EL-Client synced!");
+  Serial.println("API synced!");
 
   // Set-up callbacks for events and initialize with es-link.
   mqtt.connectedCb.attach(mqttConnected);
@@ -139,7 +137,7 @@ void API::apiInit() {
   //Serial.println("ARDUINO: setup mqtt lwt");
   //mqtt.lwt("/lwt", "offline", 0, 0); //or mqtt.lwt("/lwt", "offline");
 
-  Serial.println("EL-MQTT ready");
+  Serial.println("MQTT ready");
 }
 
 /*Allt under här ska kunna plockas bort. */
@@ -147,8 +145,8 @@ void API::apiInit() {
 void API::Init_Response()
 {
   Serial.print(syncValue);
-  Serial.print(commandIndex);
-
+  Serial.print(commandIndex) ;
+ 
 }
 void API::Response_add_value(int value)
 {
@@ -250,8 +248,8 @@ bool API::CheckSyncValue()
 }
 bool API::setCommand()
 {
-  commandIndex=(API::API_COMMAND)atoi(temp);
-  if(commandIndex== -1)
+  commandIndex= (API::API_COMMAND)atoi(temp);
+  if(commandIndex == -1)
   return false;
   return true;
 }
@@ -595,7 +593,7 @@ void API::leave()
   clearTemp();
   clear_args();
   clearBuffer();
-  commandIndex=-1;
+  commandIndex = (API::API_COMMAND)atoi(-1);
   inputComplete=false;
 }
 

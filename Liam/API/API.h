@@ -24,6 +24,7 @@ enum API_STATUS_CODE {
 
 enum API_COMMAND {
   /* Notify 0-->99 */
+  CLEAR = -1,
   HEARTBEAT=4,
   NOTIFY=10,
   SUBSCRIBE=11,
