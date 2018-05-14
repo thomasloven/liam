@@ -91,6 +91,8 @@ const int SETUP_DEBUG = 5;
 // Version 2 of the BWF transmitter
 #define INSIDE_BWF          85
 #define OUTSIDE_BWF         5
+// Margin of error for reading the signal
+#define BWF_CODE_ERROR 2
 
 #pragma endregion BWF
 

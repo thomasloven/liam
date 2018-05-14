@@ -14,13 +14,8 @@
 #ifndef _BWFSENSOR_H_
 #define _BWFSENSOR_H_
 
-#define INSIDE    1
-#define NOSIGNAL  0
-#define OUTSIDE   -1
-
 // BWF Code for timout and no signal (in milliseconds)
 #define TIMEOUT_DELAY    20000
-#define NO_SIGNAL_DELAY  4000
 
 
 class BWFSENSOR {
@@ -32,10 +27,11 @@ class BWFSENSOR {
 
     bool isInside();
     bool isOutside();
-    bool isTimedOut();
-	bool isOutOfBounds();
+    bool isOutOfBounds();
     bool hasNoSignal();
     bool gotSignal();
+
+    bool matchCode(int *code, int len);
 
     void readSensor();
 
@@ -48,14 +44,9 @@ class BWFSENSOR {
 
     const static int pulse_unit_length = 100;
 
-    int pulse_count_inside;
-    int pulse_count_outside;
-
     int selpin_A;
     int selpin_B;
 
-    int signal_status;
-    long last_match;
     long last_pulse;
 
     // Array for debug printing

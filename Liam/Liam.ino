@@ -293,7 +293,7 @@ void loop()
 
       Sensor.select(1);
 
-	  mower_is_outside = Sensor.isOutOfBounds();
+      mower_is_outside = Sensor.isOutOfBounds();
 
       // Check right sensor (1) and turn left if needed
       if (mower_is_outside) {

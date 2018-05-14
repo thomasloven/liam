@@ -64,47 +64,59 @@ void BWFSENSOR::select(int sensornumber) {
   digitalWrite(selpin_B, (sensornumber & 2) > 0 ? HIGH : LOW);
   clearSignal();
   long time = millis();
-  while (signal_status == NOSIGNAL 
-    && millis() - time < BWF_COLLECT_SIGNAL_TIME) // max time of 200ms
+
+  while(!gotSignal()
+        && millis() - time < BWF_COLLECT_SIGNAL_TIME)
   {
     delay(1);
   }
-
-  // delay(200);
 }
 
 
 void BWFSENSOR::clearSignal() {
   for (int i = 0; i < arr_length; i++)
     arr[i] = 0;
-  signal_status = NOSIGNAL;
-  pulse_count_inside = 0;
-  pulse_count_outside = 0;
   arr_count = 0;
 }
 
 
 bool BWFSENSOR::isInside() {
-  return (signal_status == INSIDE);
+  return matchCode(inside_code, sizeof(inside_code)/sizeof(inside_code[0]));
 }
 
 bool BWFSENSOR::isOutside() {
-  return (signal_status == OUTSIDE);
+  return matchCode(outside_code, sizeof(outside_code)/sizeof(outside_code[0]));
 }
 
 bool BWFSENSOR::isOutOfBounds() {
-	if (BWF_DETECTION_ALWAYS)
-		return !isInside();
-	else
-		return isOutside();
+  if (BWF_DETECTION_ALWAYS)
+    return !isInside();
+  else
+    return isOutside();
 }
 
-bool BWFSENSOR::isTimedOut() {
-  return (last_match + TIMEOUT_DELAY < millis());
-}
 
-bool BWFSENSOR::hasNoSignal() {
-  return (last_match + NO_SIGNAL_DELAY < millis());
+bool BWFSENSOR::matchCode(int *code, int len)
+{
+  // Check for code starting at each point of the buffer
+  for (int i=0; i < arr_length; i++)
+  {
+    // Start from the latest entry, going backwards
+    int start = (arr_count + arr_length - i) % arr_length;
+    bool match = true;
+    for (int j = 0; j < len; j++)
+    {
+      if (abs(arr[start+j] - code[j]) > BWF_CODE_ERROR)
+      {
+        match = false;
+        break;
+      }
+    }
+    if(match)
+      return true;
+  }
+
+  return false;
 }
 
 
@@ -118,38 +130,11 @@ void BWFSENSOR::readSensor() {
   last_pulse = now;
 
   // Convert to pulse units (rounding up)
-  int pulse_length = (time_since_pulse+(pulse_unit_length/2)) / pulse_unit_length;
+  int pulse_length = (time_since_pulse + (pulse_unit_length/2)) / pulse_unit_length;
 
-  // Check if the latest pulse fits the code for inside
-  if (abs(pulse_length-inside_code[pulse_count_inside]) < 2) {
-    pulse_count_inside++;
-
-    // Check if the entire pulse train has been batched
-    if (pulse_count_inside >= sizeof(inside_code)/sizeof(inside_code[0])) {
-      signal_status = INSIDE;
-      last_match = millis();
-      pulse_count_inside=0;
-    }
-  } else {
-    pulse_count_inside=0;
-  }
-
-  // Check if the latest pulse fits the code for outside
-  if (abs(pulse_length-outside_code[pulse_count_outside]) < 2) {
-    pulse_count_outside++;
-    if (pulse_count_outside >= sizeof(outside_code)/sizeof(outside_code[0])) {
-      signal_status = OUTSIDE;
-      last_match = millis();
-      pulse_count_outside=0;
-    }
-  } else {
-    pulse_count_outside=0;
-  }
-
-
-  // Store the received code for debug output
+  // Store the received code
   arr[arr_count++] = pulse_length;
-  if (arr_count>arr_length) arr_count=0;
+  if (arr_count > arr_length) arr_count=0;
 }
 
 void BWFSENSOR::printSignal() {

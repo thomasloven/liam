@@ -122,8 +122,6 @@ int CONTROLLER::waitWhileChecking(int duration) {
       return 2;
     if(rightMotor->isOverloaded())
       return 2;
-    if (sensor->isTimedOut())
-      return 3;
 
     delay(turnDelay);
   }
