@@ -75,6 +75,8 @@ long lastCollision = 0;
 long dockingInsideSince = 0;
 long lastDockingAllOutsideCheck = 0;
 
+bool debug_mode = false;
+
 
 // Set up all the defaults (check the Definition.h file for all default values)
 DEFINITION Defaults;
@@ -132,6 +134,7 @@ void updateBWF() {
   Sensor.readSensor();
 }
 
+
 // ****************** Setup **************************************
 void setup()
 {
@@ -156,10 +159,10 @@ void setup()
   Display.print(F("--- LIAM ---\n"));
   Display.print(F(VERSION_STRING "\n"));
   Display.print(__DATE__ " " __TIME__ "\n");
-  
+
   #ifdef DEBUG_ENABLED
-  Serial.println("----------------");
-  Serial.println("Send D to enter setup and debug mode");
+  Serial.println(F("----------------"));
+  Serial.println(F("Send D to enter setup and debug mode"));
   //SetupAndDebug.initialize(&Serial);
   state = SetupAndDebug.tryEnterSetupDebugMode(0);
   #endif
@@ -186,7 +189,7 @@ void setup()
 // ***************** Main loop ***********************************
 void loop()
 {
-  
+
   #ifdef DEBUG_ENABLED
   state = SetupAndDebug.tryEnterSetupDebugMode(state);
   if (state == SETUP_DEBUG) {
