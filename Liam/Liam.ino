@@ -67,6 +67,11 @@ long time_at_turning = millis();
 int turn_direction = 1;
 int LCDi = 0;
 
+#define CMD_AUTO 0
+#define CMD_GOHOME 1
+#define CMD_MOW 2
+int command = CMD_AUTO;
+
 
 // Set up all the defaults (check the Definition.h file for all default values)
 DEFINITION Defaults;
@@ -158,17 +163,57 @@ void setup()
 
 }
 
-
-
+int cmd_step = 0;
+char cmd_given = '\0';
+long lastsend = 0;
 // ***************** Main loop ***********************************
 void loop()
 {
+
+  Battery.updateVoltage();
+  Display.update();
   boolean in_contact;
   boolean mower_is_outside;
   int err=0;
-  LCDi++;  //Loops 0-10
-  if (LCDi % 25 == 0 ){
-    Display.update();
+  if(millis()-lastsend > 15000)
+  {
+  Serial.println("");
+  Serial.print("BAT:");
+  Serial.println(Battery.getVoltage());
+
+  Serial.print("STT:");
+  Serial.println(state);
+
+  Serial.print("CMD:");
+  Serial.println(command);
+
+  lastsend = millis();
+  }
+
+  while(Serial.available())
+  {
+    char input = Serial.read();
+    if(input == '<')
+    {
+      cmd_step = 1;
+      cmd_given = '\0';
+    } else if(cmd_step == 1) {
+      cmd_given = input;
+      cmd_step = 2;
+    } else if(input == '>' && cmd_step == 2) {
+      cmd_step = 0;
+      switch(cmd_given)
+      {
+        case 'H':
+          command = CMD_GOHOME;
+          break;
+        case 'M':
+          command = CMD_MOW;
+          break;
+        default:
+          command = CMD_AUTO;
+      }
+    }
   }
 
   // Security check Mower is flipped/lifted.
@@ -215,8 +260,6 @@ void loop()
 
     //------------------------- MOWING ---------------------------
     case MOWING:
-      Battery.updateVoltage();
-      Display.update();
 
       Sensor.select(0);
 
@@ -235,7 +278,7 @@ void loop()
         if(err)
           Error.flag(err);
 #endif
-        if (Battery.mustCharge()) {
+        if (Battery.mustCharge() || command == CMD_GOHOME) {
           Mower.stopCutter();
           Mower.runForward(FULLSPEED);
           delay(1000);
@@ -448,7 +491,8 @@ void loop()
       if (Battery.isFullyCharged() && Clock.timeToCut())
         state = LAUNCHING;
 #else
-      if (Battery.isFullyCharged())
+      if ((Battery.isFullyCharged() && command == CMD_AUTO) ||
+          command == CMD_MOW && !Battery.mustCharge())
         state = LAUNCHING;
 #endif
 
