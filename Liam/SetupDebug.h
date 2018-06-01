@@ -43,6 +43,7 @@ class SETUPDEBUG {
     void cutterSpeedDown();
     void printStatus();
     void getMotionValues();
+    void trimpotAdjust();
 
     boolean led_is_on;
 
