@@ -65,7 +65,15 @@
   #include "SetupDebug.h"
 #endif
 
+#include <ELClient.h>
+#include <ELClientCmd.h>
+#include <ELClientMqtt.h>
+
+#define AUTO 0
+#define GO_HOME 1
+#define MOW 2
 // Global variables
+int command_mqtt = AUTO;
 int state;
 long time_at_turning = millis();
 int turn_direction = 1;
@@ -85,7 +93,7 @@ DEFINITION Defaults;
 // Types available: BRUSHED (for all brushed motors, A3620 and NIDEC 22)
 //          BRUSHLESS (for all hobbyking motors with external ESC)
 //          NIDEC (for NIDEC 24)
-CUTTERMOTOR CutterMotor(BRUSHED, CUTTER_PWM_PIN, CUTTER_CURRENT_PIN);
+CUTTERMOTOR CutterMotor(NIDEC, CUTTER_PWM_PIN, CUTTER_CURRENT_PIN);
 
 // Wheelmotors
 WHEELMOTOR rightMotor(WHEEL_MOTOR_A_PWM_PIN, WHEEL_MOTOR_A_DIRECTION_PIN, WHEEL_MOTOR_A_CURRENT_PIN, WHEELMOTOR_SMOOTHNESS);
@@ -171,6 +179,7 @@ void setup()
   Display.clear();
 
   if (state != SETUP_DEBUG) {
+    mqtt_setup();
     if (Battery.isBeingCharged()) {     // If Liam is in docking station then
       state = CHARGING;           // continue charging
       Mower.stopCutter();
@@ -197,6 +206,7 @@ void loop()
   }
   #endif
   long looptime= millis();
+  mqtt_send();
   boolean in_contact;
   boolean mower_is_outside;
   int err=0;
@@ -252,7 +262,7 @@ void loop()
       Battery.updateVoltage();
       Display.update();
 
-      if (Battery.mustCharge()) {
+      if (Battery.mustCharge() || command_mqtt == GO_HOME) {
         state = LOOKING_FOR_BWF;
         break;
       }
@@ -532,7 +542,7 @@ void loop()
       if (Battery.isFullyCharged() && Clock.timeToCut())
         state = LAUNCHING;
 #else
-      if (Battery.isFullyCharged())
+      if (Battery.isFullyCharged() && command_mqtt != GO_HOME)
         state = LAUNCHING;
 #endif
 
@@ -566,3 +576,81 @@ void loop()
 }
 
 
+
+ELClient esp(&Serial, &Serial);
+ELClientCmd cmd(&esp);
+ELClientMqtt mqtt(&esp);
+void mqttData(void *response)
+{
+  ELClientResponse *res = (ELClientResponse *)response;
+  String topic = res->popString();
+  String data = res->popString();
+  Serial.print("MQTT In (");
+  Serial.print(topic);
+  Serial.print(") ");
+  Serial.println(data);
+  if(topic == F("/mower/1/command"))
+  {
+    if(data == "M")
+      command_mqtt = MOW;
+    else if(data == "H")
+      command_mqtt = GO_HOME;
+    else
+      command_mqtt = AUTO;
+  }
+}
+bool connected;
+void mqttConnected(void *response)
+{
+  mqtt.subscribe("/mower/1/command");
+  connected = true;
+}
+void mqttDisconnected(void *response)
+{
+  connected = false;
+}
+
+void mqtt_setup()
+{
+  bool ok;
+  do
+  {
+    ok = esp.Sync();
+    if(!ok) Serial.println(".");
+  } while(!ok);
+  Serial.println("Synced");
+  mqtt.connectedCb.attach(mqttConnected);
+  mqtt.disconnectedCb.attach(mqttDisconnected);
+  mqtt.dataCb.attach(mqttData);
+  mqtt.setup();
+}
+
+long last_mqtt;
+void mqtt_send()
+{
+  esp.Process();
+  if(!connected)
+  {
+    Serial.println("Not connected");
+    return;
+  }
+  if((millis()-last_mqtt) < 10000)
+  {
+    Serial.println("Not time to send");
+    return;
+  }
+  char buf[12];
+  itoa(Battery.getVoltage(), buf, 10);
+  mqtt.publish("/mower/1/battery", buf);
+  Serial.print("Battery:");
+  Serial.println(buf);
+  itoa(state, buf, 10);
+  mqtt.publish("/mower/1/state", buf);
+  Serial.print("State:");
+  Serial.println(buf);
+  itoa(command_mqtt, buf, 10);
+  mqtt.publish("/mower/1/lastcmd", buf);
+  Serial.print("Command:");
+  Serial.println(buf);
+  last_mqtt = millis();
+}

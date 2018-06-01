@@ -139,8 +139,8 @@ const int SETUP_DEBUG = 5;
 // Enable this if you need the mower to go backward until it's inside and then turn.
 // Default behavior is to turn directly when mower is outside BWF, if definition below is enabled this might help mower not to get stuck in slopes.
 // If mower is not inside within x seconds mower will stop.
-//#define GO_BACKWARD_UNTIL_INSIDE
-//#define MAX_GO_BACKWARD_TIME  5 // try to get inside for max x seconds, then stop and error.
+#define GO_BACKWARD_UNTIL_INSIDE
+#define MAX_GO_BACKWARD_TIME  5 // try to get inside for max x seconds, then stop and error.
 
 class DEFINITION {
   public:
