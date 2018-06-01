@@ -194,6 +194,8 @@ void setup()
 }
 
 
+long lastturn;
+
 
 // ***************** Main loop ***********************************
 void loop()
@@ -255,6 +257,24 @@ void loop()
     Mower.resetBalance();
   }
 
+  if((millis() - lastturn) > 60000)
+  {
+    Serial.println(F("Force turn"));
+    Mower.runBackward(FULLSPEED);
+    int angle = random(90, 160);
+    if (Mower.waitWhileInside(1200) == 0) {
+
+      if (random(0, 100) % 2 == 0) {
+        Mower.turnRight(angle);
+      }
+      else {
+        Mower.turnLeft(angle);
+      }
+      lastturn = millis();
+      Mower.runForward(FULLSPEED);
+    }
+  }
+
   switch (state) {
 
     //------------------------- MOWING ---------------------------
@@ -294,6 +314,7 @@ void loop()
         }
 
         Compass.setNewTargetHeading();
+        lastturn = millis();
 
         if (Mower.allSensorsAreOutside()) {
           Mower.runBackward(FULLSPEED);
@@ -330,6 +351,7 @@ void loop()
         }
 
         Compass.setNewTargetHeading();
+        lastturn = millis();
 
         if (Mower.allSensorsAreOutside()) {
           Mower.runBackward(FULLSPEED);
@@ -416,6 +438,7 @@ void loop()
       Mower.waitWhileChecking(5000);
 
       Compass.setNewTargetHeading();
+      lastturn = millis();
 
       Mower.runForward(FULLSPEED);
 

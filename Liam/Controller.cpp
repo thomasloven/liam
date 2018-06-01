@@ -151,11 +151,10 @@ int CONTROLLER::waitWhileInside(int duration) {
 int CONTROLLER::GoBackwardUntilInside (BWFSENSOR *Sensor) {
   int counter=MAX_GO_BACKWARD_TIME;
   //Mover has just stoped. Let it pause for a second.
-  delay(1000);
   while(Sensor->isInside()==false)
   {
     runBackward(FULLSPEED);
-    delay(1000);
+    delay(700);
     counter--;
     if(counter<=0)
       return ERROR_OUTSIDE;
