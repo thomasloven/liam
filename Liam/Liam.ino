@@ -257,23 +257,6 @@ void loop()
     Mower.resetBalance();
   }
 
-  if((millis() - lastturn) > 60000)
-  {
-    Serial.println(F("Force turn"));
-    Mower.runBackward(FULLSPEED);
-    int angle = random(90, 160);
-    if (Mower.waitWhileInside(1200) == 0) {
-
-      if (random(0, 100) % 2 == 0) {
-        Mower.turnRight(angle);
-      }
-      else {
-        Mower.turnLeft(angle);
-      }
-      lastturn = millis();
-      Mower.runForward(FULLSPEED);
-    }
-  }
 
   switch (state) {
 
@@ -282,9 +265,30 @@ void loop()
       Battery.updateVoltage();
       Display.update();
 
+      Mower.startCutter();
+
       if (Battery.mustCharge() || command_mqtt == GO_HOME) {
         state = LOOKING_FOR_BWF;
         break;
+      }
+
+
+      if((millis() - lastturn) > 60000)
+      {
+        Serial.println(F("Force turn"));
+        Mower.runBackward(FULLSPEED);
+        int angle = random(90, 160);
+        if (Mower.waitWhileInside(1200) == 0) {
+
+          if (random(0, 100) % 2 == 0) {
+            Mower.turnRight(angle);
+          }
+          else {
+            Mower.turnLeft(angle);
+          }
+          lastturn = millis();
+          Mower.runForward(FULLSPEED);
+        }
       }
 
       Sensor.select(0);
@@ -580,9 +584,9 @@ void loop()
 
       // If the mower is not being charged, jiggle it a bit
       if (!in_contact) {
-        Mower.runBackward(20);  // Back away slow speed
+        Mower.runBackward(40);  // Back away slow speed
         delay(500);
-        Mower.runForward(20); // Dock again at slow speed
+        Mower.runForward(40); // Dock again at slow speed
         delay(1000);
         Mower.stop();
       }
