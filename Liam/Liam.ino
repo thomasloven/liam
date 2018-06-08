@@ -67,6 +67,11 @@
 
 // Global variables
 int state;
+#ifdef AUTO_DOCKING
+int command = CMD_AUTO;
+#else
+int command = CMD_MOW;
+#endif
 long time_at_turning = millis();
 int turn_direction = 1;
 int LCDi = 0;
@@ -242,6 +247,13 @@ void loop()
     Mower.resetBalance();
   }
 
+  if(command == CMD_STOP)
+  {
+    Mower.stop();
+    Mower.stopCutter();
+    return;
+  }
+
   switch (state) {
 
     //------------------------- MOWING ---------------------------
@@ -249,7 +261,7 @@ void loop()
       Battery.updateVoltage();
       Display.update();
 
-      if (Battery.mustCharge()) {
+      if (Battery.mustCharge() || command == CMD_HOME && command != CMD_MOW) {
         state = LOOKING_FOR_BWF;
         break;
       }
@@ -542,11 +554,11 @@ void loop()
       rightMotor.setSmoothness(WHEELMOTOR_SMOOTHNESS);
 
       // Just remain in this state until battery is full
+      if( (Battery.isFullyCharged() &&
 #if defined __RTC_CLOCK__
-      if (Battery.isFullyCharged() && Clock.timeToCut()) {
-#else
-      if (Battery.isFullyCharged()) {
+      Clock.timeToCut() &&
 #endif
+      command != CMD_HOME) || (!Battery.mustCharge() && command == CMD_MOW) ) {
           //Don't launch without signal
         if (Sensor.isInside() || Sensor.isOutside())
         {

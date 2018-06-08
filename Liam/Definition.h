@@ -38,6 +38,9 @@
 
 #define DEBUG_ENABLED true
 
+// If not defined, mower will not try to dock, but will keep mowing until battery runs out
+#define AUTO_DOCKING
+
 const int NUMBER_OF_SENSORS = 2;  // Number of BWF sensors can be 1-4 depending on shield default 2 left and right front.
 
 // Pin setup following Morgan 1.5 shield and up
@@ -79,6 +82,13 @@ const int DOCKING = 2;
 const int CHARGING = 3;
 const int LOOKING_FOR_BWF = 4;
 const int SETUP_DEBUG = 5;
+
+// Mower commands
+#define CMD_AUTO  0
+#define CMD_MOW   1
+#define CMD_HOME  2
+#define CMD_STOP  3
+#define CMD_DEBUG 4
 
 // Turning details
 #define REVERSE_DELAY         2
