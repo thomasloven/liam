@@ -65,6 +65,8 @@
   #include "SetupDebug.h"
 #endif
 
+#include "esplinkMQTT.h"
+
 // Global variables
 int state;
 #ifdef AUTO_DOCKING
@@ -173,6 +175,7 @@ void setup()
   Display.clear();
 
   if (state != SETUP_DEBUG) {
+    mqtt_setup();
     if (Battery.isBeingCharged()) {     // If Liam is in docking station then
       state = CHARGING;           // continue charging
       Mower.stopCutter();
@@ -199,6 +202,7 @@ void loop()
   }
   #endif
   long looptime= millis();
+  mqtt_send(Battery.getVoltage());
   boolean in_contact;
   boolean mower_is_outside;
   int err=0;
@@ -595,5 +599,3 @@ void loop()
     Serial.println(millis() - looptime);
 
 }
-
-
